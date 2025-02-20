@@ -1,6 +1,7 @@
 package FTP.Cliente;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Scanner;
 
 import org.apache.commons.net.ftp.FTPClient;
@@ -87,6 +88,10 @@ public class ClienteFtp {
 		
 		return mode;
 	}
+	
+	public static void handlerActiveMode() {
+		
+	}
 
 	public static void main(String[] args) {
 		FTPClient ftpClient;
@@ -124,11 +129,31 @@ public class ClienteFtp {
 			if (mode.equals("PASSIVE")) {
 				ftpClient.enterLocalPassiveMode();
 				ftpClient.sendCommand("PASV");
+				
+				System.out.println("\nModo pasivo configurado");  
+				
 			} else if (mode.equals("ACTIVE")) {
-				ftpClient.enterLocalActiveMode();;
+				InetAddress inetAdress = ftpClient.getLocalAddress();
+				String hostAddress = inetAdress.getHostAddress().replace(".", ",");
+				
+		        System.out.println("\nPuerto para datos (ej. 5500 o superior)");  
+		        System.out.print(":> ");
+		        int dataPort = Integer.parseInt(sc.nextLine());  
+
+		        int p1 = dataPort / 256;  
+		        int p2 = dataPort % 256;  
+
+		        String comandoPort = String.format("PORT %s,%d,%d", hostAddress, p1, p2); 
+		        
+		        ftpClient.enterLocalActiveMode(); 
+		        ftpClient.sendCommand(comandoPort); 
+		        System.out.println("\nModo activo configurado");  
+		        
 			} else {
 				System.err.println("Error: Modo de conexión elegido desconocido");
 			}
+			
+			ftpClient.disconnect();
 			
 		} catch (IOException e) {
 			e.printStackTrace();

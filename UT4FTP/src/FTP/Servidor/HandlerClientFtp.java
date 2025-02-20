@@ -10,20 +10,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HandlerClientFtp implements Runnable {
-	private Socket client;
-
+	private Socket controlSocket;
+	private ServerSocket dataSocketPasv;
+	private Socket dataSocketAct;
+	private String conexionMode;
+	private String serverClientAddress;
 	private BufferedReader in;
 	private PrintWriter out;
-
-	private Socket dataPortPasivo;
-	private ServerSocket dataPortActivo;
-	
 	private User user;
-
 	private String command;
 
-	public HandlerClientFtp(Socket client) throws IOException {
-		this.client = client;
+	public HandlerClientFtp(Socket controlSocket) throws IOException {
+		this.controlSocket = controlSocket;
 		user = new User();
 	}
 
@@ -78,11 +76,11 @@ public class HandlerClientFtp implements Runnable {
 	@Override
 	public void run() {
 		System.out.println("\n[SOLICITUD RECIBIDA]");
-		System.out.println("\nConexión con el cliente " + client.getInetAddress());
+		System.out.println("\nConexión con el cliente " + controlSocket.getInetAddress());
 
 		try {
-			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			out = new PrintWriter(client.getOutputStream(), true);
+			in = new BufferedReader(new InputStreamReader(controlSocket.getInputStream()));
+			out = new PrintWriter(controlSocket.getOutputStream(), true);
 
 			sendReply(220, "Welcome to the FTP server");
 
@@ -93,6 +91,21 @@ public class HandlerClientFtp implements Runnable {
 					break;
 				case "PASS":
 					handlerUserCredentials(command, out);
+					break;
+				case "PASV":
+					System.out.println("Comando recibido: " + command);
+					conexionMode = "PASSIVE";
+					
+					//sendReply(227, "Entering Passive Mode");
+					
+					break;
+				case "PORT":
+					System.out.println("Comando recibido: " + command);
+					conexionMode = "ACTIVE";
+					serverClientAddress = command.split(" ")[1];
+					
+					//sendReply(502, "Comando no implementado");
+					
 					break;
 				case "LIST":
 					break;
@@ -111,7 +124,7 @@ public class HandlerClientFtp implements Runnable {
 					in.close();
 				if (out != null)
 					out.close();
-				client.close();
+				controlSocket.close();
 			} catch (IOException e) {
 				System.err.println("Error al cerrar la conexión del cliente: " + e.getMessage());
 			}

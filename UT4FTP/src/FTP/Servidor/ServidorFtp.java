@@ -10,7 +10,8 @@ import java.util.concurrent.Executors;
 
 
 public class ServidorFtp {
-	protected static String dirRoot = "C:\\Users\\elija\\Desktop\\ServidorFTP";
+	//protected static String dirRoot = "C:\\Users\\elija\\Desktop\\ServidorFTP";
+	protected static String dirRoot = "C:\\Users\\alumno\\Desktop\\ServidorFTP";
 	protected static final String FILES_DIR = "files";
 	protected static final String USERS_DIR = FILES_DIR + File.separator + "users";
 	protected static final String USERS_FILE = USERS_DIR + File.separator + "users.txt";
